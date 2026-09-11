@@ -19,9 +19,10 @@ project:
 number-depth: 2
 
 
+
 book:
   title: "COMP/STAT212 Portfolio"
-  author: "Your Name Here"
+  author: "Ben Beauvais"
   date: today  # use today to update date published based on last time project was edited
   date-format: full
   # favicon: path/to/favorite-logo.png
@@ -44,7 +45,7 @@ book:
       # footer text
 
   sidebar:
-    title: "Your Name Here"
+    title: "Ben Beauvais"
     logo: assets/sidebar-logo.png
     logo-alt: "Random negative space illustration"
     collapse-level: 2
@@ -56,7 +57,7 @@ book:
     #     href: "https://link-to-tool"
 
   chapters:
-    - text: "Welcome"
+    - text: "Welcome to the Jungle"
       href: index.qmd
 
     - part: "Personal Viz Journey"
