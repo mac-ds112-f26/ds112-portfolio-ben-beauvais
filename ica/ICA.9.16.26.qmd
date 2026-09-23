@@ -20,6 +20,7 @@ hikes <- read.csv("https://mac-stat.github.io/data/high_peaks.csv")
 Let's dig into the `hikes` data, starting with the `elevation` and difficulty `ratings` of the hikes:
 
 ```{r}
+library(tidyverse)
 head(hikes)
 ```
 
@@ -33,7 +34,7 @@ Try running the following chunk and simply take note of the error message -- thi
 
 ```{r}
 # Use the ggplot function
-ggplot(hikes, aes(x = rating))
+ggplot(hikes, aes(x = rating)) 
 ```
 
 In order to use `ggplot` tools, we have to first *load* the `tidyverse` package in which they live.
@@ -154,7 +155,8 @@ Here:
 
 ```{r}
 # write your code here
-
+ggplot(hikes, aes(x = elevation)) +
+  geom_bar()
 ```
 
 ## Exercise 7: A Histogram of Elevation
@@ -197,7 +199,8 @@ Don't forget a `+`.
 If it doesn't come to you within 2 minutes, *no problem* -- all will be revealed in the next exercise.
 
 ```{r}
-ggplot(hikes, aes(x = elevation))
+ggplot(hikes, aes(x = elevation)) +
+  geom_histogram()
 ```
 
 ## Exercise 9: Building Histograms - Part 2
@@ -307,11 +310,10 @@ We *obviously* won't be done until we talk about communication.
 All code above has a similar *general* structure (where the details can change):
 
 ```{r}
-#| eval: false
+ggplot(hikes, aes(x = elevation)) +
+  geom_histogram(color = "white", binwidth = 200) +
+  labs(x = "Elevation (feet)", y = "Number of hikes")
 
-ggplot(___, aes(x = ___)) + 
-  geom___(color = "___", fill = "___") + 
-  labs(x = "___", y = "___")
 ```
 
 - Though not *necessary* to the code working, it's common, good practice to *indent* or *tab* the lines of code after the first line (counterexample below). Why?
@@ -342,6 +344,15 @@ survey <- read.csv("../data/survey.csv")
 
 # World Cup data
 world_cup <- read.csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-11-29/worldcups.csv")
+# example: bar chart of a categorical column, histogram of a quantitative one
+# swap column names for whatever you're exploring
+ggplot(survey, aes(x = year)) +
+  geom_bar() +
+  labs(x = "Year", y = "Count")
+
+ggplot(world_cup, aes(x = attendance)) +
+  geom_histogram(color = "white", binwidth = 100000) +
+  labs(x = "Attendance", y = "Number of tournaments")
 ```
 
 #### Part b
