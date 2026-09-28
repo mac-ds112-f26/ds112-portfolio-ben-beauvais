@@ -20,12 +20,11 @@ Which sectors gave the best return, and did the higher-return sectors also take 
 ```{r}
 #| message: false
 #| warning: false
-# Run once in the Console if you don't have it: install.packages("tidyquant")
 library(tidyverse)
 library(tidyquant)
 ```
 
-## Get the data
+## Get the data here: -->
 
 ```{r}
 #| message: false
