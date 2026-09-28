@@ -1,0 +1,130 @@
+---
+title: "Which Sectors Won? S&P 500 Sector Performance, 2025–2026"
+author: "Ben Beauvais"
+format: html
+---
+
+<!--
+Sector analysis too see if volatility = increased returns
+-->
+
+## Research question
+
+How did the 11 S&P 500 sectors perform from January 2025 to today?
+Which sectors gave the best return, and did the higher-return sectors also take on more risk?
+
+**Data:** daily adjusted closing prices for the 11 Select Sector SPDR ETFs plus SPY (the whole S&P 500), pulled from Yahoo Finance with the `tidyquant` package.
+
+## Setup
+
+```{r}
+#| message: false
+#| warning: false
+library(tidyverse)
+library(tidyquant)
+```
+
+## Get the data here: -->+
+
+```{r}
+#| message: false
+sectors <- tibble(
+  symbol = c("XLK", "XLF", "XLE", "XLV", "XLY", "XLP",
+             "XLI", "XLB", "XLU", "XLRE", "XLC", "SPY"),
+  sector = c("Technology", "Financials", "Energy", "Health Care",
+             "Consumer Disc.", "Consumer Staples", "Industrials",
+             "Materials", "Utilities", "Real Estate",
+             "Communication", "S&P 500 (SPY)")
+)
+
+prices <- tq_get(sectors$symbol, from = "2025-01-01") |>
+  select(symbol, date, adjusted) |>
+  left_join(sectors, by = "symbol")
+
+head(prices)
+```
+
+## Wrangle: daily returns and growth of $100 to put the grwoth in perspective
+
+```{r}
+returns <- prices |>
+  group_by(sector) |>
+  arrange(date, .by_group = TRUE) |>
+  mutate(
+    daily_return = adjusted / lag(adjusted) - 1,   # % change from yesterday
+    growth_100   = 100 * adjusted / first(adjusted) # value of $100 invested on day 1
+  ) |>
+  ungroup() |>
+  filter(!is.na(daily_return))
+
+summary_tbl <- returns |>
+  group_by(sector) |>
+  summarize(
+    total_return = last(growth_100) / 100 - 1,
+    volatility   = sd(daily_return) * sqrt(252)    # annualized
+  ) |>
+  arrange(desc(total_return))
+
+summary_tbl
+```
+
+## 1. Univariate: what does a "normal day" look like for the S&P 500?
+
+```{r}
+returns |>
+  filter(symbol == "SPY") |>
+  ggplot(aes(x = daily_return)) +
+  geom_histogram(binwidth = 0.0025, fill = "steelblue", color = "white") +
+  scale_x_continuous(labels = scales::percent) +
+  labs(title = "Distribution of SPY daily returns since Jan 2025",
+       x = "Daily return", y = "Number of days")
+```
+
+**My interpretation:** *(Spread is concentrated around 0 with some outliers around 12% and -4 - 7% which makes sense to me because the typical annual return for the s&p 500 is around 0?)*
+
+## 2. Bivariate: which sectors are riskiest day to day?
+
+```{r}
+returns |>
+  ggplot(aes(x = daily_return, y = fct_reorder(sector, daily_return, sd))) +
+  geom_boxplot(fill = "lightgray", outlier.alpha = 0.3) +
+  scale_x_continuous(labels = scales::percent) +
+  labs(title = "Daily returns by sector (sorted by volatility)",
+       x = "Daily return", y = NULL)
+```
+
+**My interpretation:** *(Higher volitility on stocks is met with higher returns, interesting to see the theory confirmed)*
+
+## 3. Multivariate: growth of $100 over time
+
+```{r}
+returns |>
+  ggplot(aes(x = date, y = growth_100, color = sector == "S&P 500 (SPY)")) +
+  geom_hline(yintercept = 100, linetype = "dashed", color = "gray50") +
+  geom_line(linewidth = 0.6) +
+  facet_wrap(~ fct_reorder(sector, -growth_100, last)) +
+  scale_color_manual(values = c("FALSE" = "gray30", "TRUE" = "firebrick"),
+                     guide = "none") +
+  scale_x_date(date_breaks = "6 months", date_labels = "%b '%y") +
+  labs(title = "Growth of $100 invested in each sector, Jan 2025 to today",
+       subtitle = "Panels ordered from best to worst performer",
+       x = NULL, y = "Value of $100")
+```
+
+**My interpretation:** *(Corresponds with the box plots with the higher the returns the more shaky the line)*
+
+## 4. Risk vs. return: did more risk pay off?
+
+```{r}
+summary_tbl |>
+  ggplot(aes(x = volatility, y = total_return, label = sector)) +
+  geom_hline(yintercept = 0, color = "gray60") +
+  geom_point(aes(color = sector == "S&P 500 (SPY)"), size = 3) +
+  geom_text(size = 3, vjust = -0.9) +
+  scale_color_manual(values = c("FALSE" = "gray30", "TRUE" = "firebrick"),
+                     guide = "none") +
+  scale_x_continuous(labels = scales::percent) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Risk vs. return by sector since Jan 2025",
+       x = "Annualized volatility (risk)", y = "Total return")
+```
