@@ -5,7 +5,7 @@ format: html
 ---
 
 <!--
-Sector analysis
+Sector analysis too see if volatility = increased returns
 -->
 
 ## Research question
@@ -24,7 +24,7 @@ library(tidyverse)
 library(tidyquant)
 ```
 
-## Get the data here: -->
+## Get the data here: -->+
 
 ```{r}
 #| message: false
